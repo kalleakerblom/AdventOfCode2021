@@ -54,7 +54,7 @@ impl BingoBoard {
 fn parse_bingo(input: &str) -> (Vec<u32>, Vec<BingoBoard>) {
     let empty_line = "\r\n\r\n";
     let (to_draw, boards) = input.split_once(empty_line).unwrap();
-    let to_draw: Vec<u32> = to_draw.split(',').map(|n| n.parse().unwrap()).collect();
+    let to_draw = to_draw.split(',').map(|n| n.parse().unwrap()).collect();
     let boards = boards.split(empty_line).map(BingoBoard::parse).collect();
     (to_draw, boards)
 }
