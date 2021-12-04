@@ -30,7 +30,7 @@ impl BingoBoard {
         let mut numbers = HashMap::new();
         for (y, line) in s.lines().enumerate() {
             for (x, n) in line.split_whitespace().enumerate() {
-                let n: u32 = n.parse().expect("Failed to read board number");
+                let n: u32 = n.parse().expect("Failed to read board number.");
                 numbers.insert(n, (x, y));
             }
         }
@@ -52,12 +52,10 @@ impl BingoBoard {
 }
 
 fn parse_bingo(input: &str) -> (Vec<u32>, Vec<BingoBoard>) {
-    let (to_draw, board_strs) = input.split_once("\r\n\r\n").unwrap();
+    let empty_line = "\r\n\r\n";
+    let (to_draw, boards) = input.split_once(empty_line).unwrap();
     let to_draw: Vec<u32> = to_draw.split(',').map(|n| n.parse().unwrap()).collect();
-    let mut boards = Vec::new();
-    for board_str in board_strs.split("\r\n\r\n") {
-        boards.push(BingoBoard::parse(board_str));
-    }
+    let boards = boards.split(empty_line).map(BingoBoard::parse).collect();
     (to_draw, boards)
 }
 
@@ -70,7 +68,7 @@ fn play_bingo_part1(to_draw: &[u32], boards: &mut [BingoBoard]) -> u32 {
             }
         }
     }
-    panic!("No winner");
+    panic!("No winner.");
 }
 
 fn play_bingo_part2(to_draw: &[u32], boards: &mut [BingoBoard]) -> u32 {
@@ -83,7 +81,6 @@ fn play_bingo_part2(to_draw: &[u32], boards: &mut [BingoBoard]) -> u32 {
                 continue;
             }
             if board.mark_number(*drawn) {
-                //winner
                 last_score = drawn * board.sum_unmarked();
                 if playing_count == 1 {
                     return last_score;
@@ -93,7 +90,7 @@ fn play_bingo_part2(to_draw: &[u32], boards: &mut [BingoBoard]) -> u32 {
             }
         }
     }
-    panic!("No winner");
+    panic!("No winner.");
 }
 
 #[cfg(test)]
