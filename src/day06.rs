@@ -1,6 +1,6 @@
 use std::{collections::HashMap, hash::Hash};
 
-fn simulate_fish(mut fish: Vec<u8>, days: usize) -> usize {
+fn simulate_fish_part1(mut fish: Vec<u8>, days: usize) -> usize {
     let mut next_fish = Vec::with_capacity(fish.len());
     for _ in 0..days {
         for &f in &fish {
@@ -20,8 +20,7 @@ fn recursive_fish_count(fish: usize, mut days: usize, memo: &mut HashMap<usize, 
     if fish >= days {
         return 1;
     }
-    days -= fish;
-    days -= 1;
+    days -= fish + 1;
     if let Some(count) = memo.get(&days) {
         return *count;
     }
@@ -35,12 +34,9 @@ fn recursive_fish_count(fish: usize, mut days: usize, memo: &mut HashMap<usize, 
     memo.insert(start_days, count);
     count
 }
-fn simulate_fish_fast(fish: &[u8], days: usize) -> usize {
+fn simulate_fish_fast_part2(fish: &[u8], days: usize) -> usize {
     let mut result = 0;
     let mut memo = HashMap::new();
-    for d in 0..(days) {
-        recursive_fish_count(0, d, &mut memo);
-    }
     for f in fish {
         result += recursive_fish_count(*f as usize, days, &mut memo);
     }
@@ -51,14 +47,14 @@ fn simulate_fish_fast(fish: &[u8], days: usize) -> usize {
 mod tests {
     use std::fs;
 
-    use crate::day06::simulate_fish_fast;
+    use crate::day06::simulate_fish_fast_part2;
 
-    use super::simulate_fish;
-    const example_06: &str = "3,4,3,1,2";
+    use super::simulate_fish_part1;
+    const EXAMPLE_06: &str = "3,4,3,1,2";
     #[test]
     fn example06_part1() {
-        let fish = example_06.split(',').map(|n| n.parse().unwrap()).collect();
-        let ans = simulate_fish(fish, 80);
+        let fish = EXAMPLE_06.split(',').map(|n| n.parse().unwrap()).collect();
+        let ans = simulate_fish_part1(fish, 80);
         assert_eq!(ans, 5934);
     }
     #[test]
@@ -68,15 +64,14 @@ mod tests {
             .split(',')
             .map(|n| n.trim().parse().unwrap())
             .collect();
-        let ans = simulate_fish(fish, 80);
+        let ans = simulate_fish_part1(fish, 80);
         assert_eq!(ans, 358214);
     }
 
     #[test]
     fn example06_part2() {
-        let fish: Vec<u8> = example_06.split(',').map(|n| n.parse().unwrap()).collect();
-        let ans = simulate_fish_fast(&fish, 256);
-        dbg!(ans);
+        let fish: Vec<u8> = EXAMPLE_06.split(',').map(|n| n.parse().unwrap()).collect();
+        let ans = simulate_fish_fast_part2(&fish, 256);
         assert_eq!(ans, 26984457539);
     }
     #[test]
@@ -86,7 +81,7 @@ mod tests {
             .split(',')
             .map(|n| n.trim().parse().unwrap())
             .collect();
-        let ans = simulate_fish_fast(&fish, 256);
+        let ans = simulate_fish_fast_part2(&fish, 256);
         assert_eq!(ans, 1622533344325);
     }
 }
