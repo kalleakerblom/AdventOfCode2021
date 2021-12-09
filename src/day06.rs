@@ -1,4 +1,4 @@
-use std::{collections::HashMap, hash::Hash};
+use std::collections::HashMap;
 
 fn simulate_fish_part1(mut fish: Vec<u8>, days: usize) -> usize {
     let mut next_fish = Vec::with_capacity(fish.len());
