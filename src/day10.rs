@@ -12,11 +12,7 @@ fn check_syntax(line: &str) -> SyntaxResult {
         match c {
             '(' | '[' | '{' | '<' => stack.push(c),
             ')' | ']' | '}' | '>' => match (stack.pop(), c) {
-                (Some('('), ')') => (),
-                (Some('['), ']') => (),
-                (Some('{'), '}') => (),
-                (Some('<'), '>') => (),
-                (None, _) => (),
+                (Some('('), ')') | (Some('['), ']') | (Some('{'), '}') | (Some('<'), '>') => (),
                 _ => return SyntaxResult::Error(c),
             },
             _ => panic!(),
@@ -29,7 +25,8 @@ fn check_syntax(line: &str) -> SyntaxResult {
 }
 
 fn part_1(input: &str) -> u32 {
-    let errors: Vec<char> = input
+    let error_score: HashMap<char, u32> = [(')', 3), (']', 57), ('}', 1197), ('>', 25137)].into();
+    input
         .lines()
         .map(check_syntax)
         .filter_map(|res| {
@@ -39,25 +36,17 @@ fn part_1(input: &str) -> u32 {
                 None
             }
         })
-        .collect();
-
-    let error_score: HashMap<char, u32> = [(')', 3), (']', 57), ('}', 1197), ('>', 25137)].into();
-    errors.iter().map(|c| error_score.get(c).unwrap()).sum()
+        .map(|c| error_score[&c])
+        .sum()
 }
 
 fn calculate_completion_score(to_close: &[char]) -> u64 {
-    let mut score = 0;
-    for c in to_close.iter().rev() {
+    let scoring: HashMap<_, _> = [('(', 1), ('[', 2), ('{', 3), ('<', 4)].into();
+    to_close.iter().rev().fold(0, |mut score, c| {
         score *= 5;
-        score += match c {
-            '(' => 1,
-            '[' => 2,
-            '{' => 3,
-            '<' => 4,
-            _ => panic!(),
-        }
-    }
-    score
+        score += scoring[c];
+        score
+    })
 }
 
 fn part_2(input: &str) -> u64 {
