@@ -81,7 +81,7 @@ mod tests {
     fn day11_part1() {
         let input = fs::read_to_string("input/day11").unwrap();
         let ans = simulate_flashing_octos(&input, 100);
-        assert_eq!(ans.0, 1656);
+        assert_eq!(ans.0, 1640);
     }
     #[test]
     fn example11_part2() {
