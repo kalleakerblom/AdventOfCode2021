@@ -93,8 +93,8 @@ fn multiply_three_largest_basin_areas(basin_map: &[Vec<usize>]) -> u32 {
         *basin_areas.entry(*id).or_default() += 1;
     }
     let mut basin_areas: Vec<u32> = basin_areas.values().cloned().collect();
-    // TODO: Only sort top 3
-    basin_areas.sort_unstable();
+    let third_last = basin_areas.len() - 3;
+    basin_areas.select_nth_unstable(third_last);
     basin_areas.iter().rev().take(3).product()
 }
 
