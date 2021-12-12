@@ -1,4 +1,5 @@
-use std::collections::{HashMap, HashSet};
+use im::HashSet;
+use std::collections::HashMap;
 
 type CaveMap = HashMap<String, Vec<String>>;
 fn read_cave_map(input: &str) -> CaveMap {
@@ -16,7 +17,7 @@ fn read_cave_map(input: &str) -> CaveMap {
     }
     result
 }
-// TODO: Use Cow for visited small caves?
+
 fn path_search(
     cave: &str,
     mut visited_small_caves: HashSet<String>,
