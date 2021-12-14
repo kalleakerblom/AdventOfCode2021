@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 #[derive(Clone, Copy)]
 enum FoldInstruction {
     X(i64),
