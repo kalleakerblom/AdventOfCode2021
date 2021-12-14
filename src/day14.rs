@@ -6,7 +6,6 @@ type Count = HashMap<char, u64>;
 type Memo = HashMap<(char, char, u32), Count>;
 
 fn parse_rules(s: &str) -> InsertionRules {
-    // CH -> B
     let read_rule = |line: &str| {
         let (pair, insert) = line.split_once(" -> ").unwrap();
         let mut pair = pair.chars();
@@ -28,17 +27,17 @@ fn count_elements_between(
     if let Some(memo_count) = memo.get(&(a, b, steps)) {
         return memo_count.clone();
     }
-    let mut count = HashMap::new();
+    let mut count = Count::new();
     if steps == 0 {
         return count;
     }
     if let Some(&mid) = rules.get(&(a, b)) {
         count = count_elements_between(a, mid, rules, steps - 1, memo);
-        let count2 = count_elements_between(mid, b, rules, steps - 1, memo);
-        for (el, co) in count2 {
+        *count.entry(mid).or_default() += 1;
+        let count_right = count_elements_between(mid, b, rules, steps - 1, memo);
+        for (el, co) in count_right {
             *count.entry(el).or_default() += co;
         }
-        *count.entry(mid).or_default() += 1;
     }
     memo.insert((a, b, steps), count.clone());
     count
