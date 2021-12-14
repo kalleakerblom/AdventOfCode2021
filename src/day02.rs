@@ -19,7 +19,7 @@ impl FromStr for Command {
     }
 }
 
-fn drive_sub_part1(cmds: &[Command]) -> (i32, i32) {
+fn drive_sub_part1(cmds: impl Iterator<Item = Command>) -> (i32, i32) {
     let mut x = 0;
     let mut depth = 0;
     for cmd in cmds {
@@ -32,7 +32,7 @@ fn drive_sub_part1(cmds: &[Command]) -> (i32, i32) {
     (x, depth)
 }
 
-fn drive_sub_part2(cmds: &[Command]) -> (i32, i32) {
+fn drive_sub_part2(cmds: impl Iterator<Item = Command>) -> (i32, i32) {
     let mut x = 0;
     let mut depth = 0;
     let mut aim = 0;
@@ -48,6 +48,16 @@ fn drive_sub_part2(cmds: &[Command]) -> (i32, i32) {
     }
     (x, depth)
 }
+
+fn part_1(input: &str) -> (i32, i32) {
+    let cmds_iter = input.lines().map(|l| l.parse().unwrap());
+    drive_sub_part1(cmds_iter)
+}
+
+fn part_2(input: &str) -> (i32, i32) {
+    let cmds_iter = input.lines().map(|l| l.parse().unwrap());
+    drive_sub_part2(cmds_iter)
+}
 #[cfg(test)]
 mod tests {
     use crate::day02::*;
@@ -55,46 +65,25 @@ mod tests {
     #[test]
     fn example_day02_part1() {
         let input = fs::read_to_string("input/example02").unwrap();
-        let cmds: Vec<Command> = input
-            .lines()
-            .map(|l| l.parse())
-            .collect::<Result<_, _>>()
-            .unwrap();
-        let pos = drive_sub_part1(&cmds);
-        assert_eq!(pos, (15, 10));
+        assert_eq!(part_1(&input), (15, 10));
     }
     #[test]
     fn day02_part1() {
         let input = fs::read_to_string("input/day02").unwrap();
-        let cmds: Vec<Command> = input
-            .lines()
-            .map(|l| l.parse())
-            .collect::<Result<_, _>>()
-            .unwrap();
-        let pos = drive_sub_part1(&cmds);
+        let pos = part_1(&input);
         assert_eq!(pos.0 * pos.1, 1561344);
     }
 
     #[test]
     fn example_day02_part2() {
         let input = fs::read_to_string("input/example02").unwrap();
-        let cmds: Vec<Command> = input
-            .lines()
-            .map(|l| l.parse())
-            .collect::<Result<_, _>>()
-            .unwrap();
-        let pos = drive_sub_part2(&cmds);
+        let pos = part_2(&input);
         assert_eq!(pos, (15, 60));
     }
     #[test]
     fn day02_part2() {
         let input = fs::read_to_string("input/day02").unwrap();
-        let cmds: Vec<Command> = input
-            .lines()
-            .map(|l| l.parse())
-            .collect::<Result<_, _>>()
-            .unwrap();
-        let pos = drive_sub_part2(&cmds);
+        let pos = part_2(&input);
         assert_eq!(pos.0 * pos.1, 1848454425);
     }
 }
