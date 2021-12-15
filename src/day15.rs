@@ -41,14 +41,13 @@ fn build_full_map(map: &RiskMap) -> RiskMap {
     let small_width = map[0].len();
     let small_height = map.len();
     let mut full_map = vec![vec![0; small_width * 5]; small_height * 5];
-    for y in 0..(small_height * 5) {
-        for x in 0..(small_width * 5) {
+    for (y, row) in full_map.iter_mut().enumerate() {
+        for (x, cell) in row.iter_mut().enumerate() {
             let bonus_risk = x / small_width + y / small_height;
             let small_x = x % small_width;
             let small_y = y % small_height;
             let new_risk = bonus_risk as u32 + map[small_y][small_x];
-
-            full_map[y][x] = if new_risk > 9 {
+            *cell = if new_risk > 9 {
                 1 + new_risk % 10
             } else {
                 new_risk
