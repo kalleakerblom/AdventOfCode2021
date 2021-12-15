@@ -36,23 +36,21 @@ fn min_risk_path(risk_map: &RiskMap) -> u32 {
 }
 
 fn build_full_map(map: &RiskMap) -> RiskMap {
-    // 5 x width, 5 x height
     let small_width = map[0].len();
     let small_height = map.len();
-    let mut full_map = vec![vec![0; small_width * 5]; small_height * 5];
-    for (y, row) in full_map.iter_mut().enumerate() {
-        for (x, cell) in row.iter_mut().enumerate() {
-            let bonus_risk = x / small_width + y / small_height;
-            let small_x = x % small_width;
-            let small_y = y % small_height;
-            let mut cell_risk = bonus_risk as u32 + map[small_y][small_x];
-            while cell_risk > 9 {
-                cell_risk -= 9;
-            }
-            *cell = cell_risk;
+    let calc_risk = |x: usize, y: usize| -> u32 {
+        let bonus_risk = x / small_width + y / small_height;
+        let small_x = x % small_width;
+        let small_y = y % small_height;
+        let mut cell_risk = bonus_risk as u32 + map[small_y][small_x];
+        while cell_risk > 9 {
+            cell_risk -= 9;
         }
-    }
-    full_map
+        cell_risk
+    };
+    (0..small_height * 5)
+        .map(|y| (0..small_width * 5).map(|x| calc_risk(x, y)).collect())
+        .collect()
 }
 
 fn part_1(input: &str) -> u32 {
