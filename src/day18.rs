@@ -118,26 +118,22 @@ fn add_to_leftmost(el: &mut Element, val: u64) -> bool {
 }
 
 fn split(el: &mut Element) -> bool {
-    let mut split_num = None;
-    match el {
-        Element::Number(n) if *n > 9 => {
-            split_num = Some(*n);
+    if let Element::Number(n) = el {
+        if *n > 9 {
+            *el = Element::Pair(
+                Box::new(Element::Number(*n / 2)),
+                Box::new(Element::Number(*n - *n / 2)),
+            );
+            true
+        } else {
+            false
         }
-        Element::Pair(a, b) => {
-            if split(a) {
-                return true;
-            } else {
-                return split(b);
-            }
+    } else if let Element::Pair(a, b) = el {
+        if split(a) {
+            true
+        } else {
+            split(b)
         }
-        _ => (),
-    }
-    if let Some(n) = split_num {
-        *el = Element::Pair(
-            Box::new(Element::Number(n / 2)),
-            Box::new(Element::Number(n - n / 2)),
-        );
-        true
     } else {
         false
     }
