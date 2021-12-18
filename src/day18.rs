@@ -41,49 +41,45 @@ fn explode(el: &mut Element) -> bool {
     explode_rec(0, el, &mut flag);
     flag
 }
+
 fn explode_rec(depth: u32, el: &mut Element, exp_flag: &mut bool) -> (Option<u64>, Option<u64>) {
-    let mut exploded = false;
-    let mut result = (None, None);
+    let mut add_left_and_right = (None, None);
     match el {
         Element::Number(_) => (),
         Element::Pair(a, b) if depth == 4 => {
-            if let (&Element::Number(a), &Element::Number(b)) = (a.as_ref(), b.as_ref()) {
+            if let (Element::Number(a), Element::Number(b)) = (a.as_ref(), b.as_ref()) {
                 *exp_flag = true;
-                exploded = true;
-                result = (Some(a), Some(b));
+                add_left_and_right = (Some(*a), Some(*b));
+                *el = Element::Number(0);
             } else {
                 panic!()
             }
         }
         Element::Pair(a, b) => {
             let left_exp = explode_rec(depth + 1, a, exp_flag);
-            if !*exp_flag {
-                let right_exp = explode_rec(depth + 1, b, exp_flag);
-                if let Some(to_add) = right_exp.0 {
-                    if !add_to_rightmost(a, to_add) {
-                        result = (Some(to_add), result.1);
-                    }
-                }
-                if let Some(to_add) = right_exp.1 {
-                    result = (result.0, Some(to_add));
-                }
-            } else {
+            if *exp_flag {
                 if let Some(to_add) = left_exp.0 {
-                    result = (Some(to_add), result.1);
+                    add_left_and_right = (Some(to_add), add_left_and_right.1);
                 }
                 if let Some(to_add) = left_exp.1 {
                     if !add_to_leftmost(b, to_add) {
-                        result = (result.0, Some(to_add));
+                        add_left_and_right = (add_left_and_right.0, Some(to_add));
                     }
+                }
+            } else {
+                let right_exp = explode_rec(depth + 1, b, exp_flag);
+                if let Some(to_add) = right_exp.0 {
+                    if !add_to_rightmost(a, to_add) {
+                        add_left_and_right = (Some(to_add), add_left_and_right.1);
+                    }
+                }
+                if let Some(to_add) = right_exp.1 {
+                    add_left_and_right = (add_left_and_right.0, Some(to_add));
                 }
             }
         }
     }
-    if exploded {
-        *el = Element::Number(0);
-        return result;
-    }
-    result
+    add_left_and_right
 }
 fn add_to_rightmost(el: &mut Element, val: u64) -> bool {
     match el {
