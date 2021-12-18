@@ -1,28 +1,34 @@
 use itertools::Itertools;
-use std::cmp;
+use std::{cmp, iter::Peekable};
 
+#[derive(Clone)]
 enum Element {
     Number(u64),
     Pair(Box<Element>, Box<Element>),
 }
 
-fn parse(chars: &mut &[char]) -> Box<Element> {
-    if chars[0] == '[' {
-        //beginning of pair
-        *chars = &chars[1..];
-        let left = parse(chars);
-        assert!(chars[0] == ',');
-        *chars = &chars[1..];
-        let right = parse(chars);
-        assert!(chars[0] == ']');
-        *chars = &chars[1..];
+fn parse(s: &str) -> Box<Element> {
+    parse_rec(&mut s.chars().peekable())
+}
+
+fn parse_rec<I: Iterator<Item = char>>(chars: &mut Peekable<I>) -> Box<Element> {
+    if matches!(chars.peek(), Some('[')) {
+        chars.next().unwrap();
+        let left = parse_rec(chars);
+        chars.next().unwrap(); // removing ,
+        let right = parse_rec(chars);
+        chars.next().unwrap(); // removing ]
         Box::new(Element::Pair(left, right))
     } else {
-        //number
-        let num_end = chars.iter().position(|c| !c.is_ascii_digit()).unwrap();
-        let num = chars[..num_end].iter().collect::<String>().parse().unwrap();
-        *chars = &chars[num_end..];
-        Box::new(Element::Number(num))
+        let mut num = String::new();
+        loop {
+            if matches!(chars.peek(), Some(c) if c.is_ascii_digit()) {
+                num.push(chars.next().unwrap());
+            } else {
+                break;
+            }
+        }
+        Box::new(Element::Number(num.parse().unwrap()))
     }
 }
 
@@ -32,14 +38,10 @@ fn add(el_a: Box<Element>, el_b: Box<Element>) -> Box<Element> {
 
 fn explode(el: &mut Element) -> bool {
     let mut flag = false;
-    recursive_explode(0, el, &mut flag);
+    explode_rec(0, el, &mut flag);
     flag
 }
-fn recursive_explode(
-    depth: u32,
-    el: &mut Element,
-    exp_flag: &mut bool,
-) -> (Option<u64>, Option<u64>) {
+fn explode_rec(depth: u32, el: &mut Element, exp_flag: &mut bool) -> (Option<u64>, Option<u64>) {
     let mut exploded = false;
     let mut result = (None, None);
     match el {
@@ -54,9 +56,9 @@ fn recursive_explode(
             }
         }
         Element::Pair(a, b) => {
-            let left_exp = recursive_explode(depth + 1, a, exp_flag);
+            let left_exp = explode_rec(depth + 1, a, exp_flag);
             if !*exp_flag {
-                let right_exp = recursive_explode(depth + 1, b, exp_flag);
+                let right_exp = explode_rec(depth + 1, b, exp_flag);
                 if let Some(to_add) = right_exp.0 {
                     if !add_to_rightmost(a, to_add) {
                         result = (Some(to_add), result.1);
@@ -98,6 +100,7 @@ fn add_to_rightmost(el: &mut Element, val: u64) -> bool {
         }
     }
 }
+
 fn add_to_leftmost(el: &mut Element, val: u64) -> bool {
     match el {
         Element::Number(n) => {
@@ -113,6 +116,7 @@ fn add_to_leftmost(el: &mut Element, val: u64) -> bool {
         }
     }
 }
+
 fn split(el: &mut Element) -> bool {
     let mut split_num = None;
     match el {
@@ -161,13 +165,9 @@ fn reduce(el: &mut Element) {
 fn part_1(s: &str) -> u64 {
     let mut lines = s.lines();
     let first = lines.next().unwrap();
-    let chars: Vec<char> = first.chars().collect();
-    let mut slice = &chars[..];
-    let first_el = parse(&mut slice);
+    let first_el = parse(first);
     let final_element = lines.fold(first_el, |acc, l| {
-        let chars: Vec<char> = l.chars().collect();
-        let mut slice = &chars[..];
-        let el = parse(&mut slice);
+        let el = parse(l);
         let mut result = add(acc, el);
         reduce(&mut result);
         result
@@ -176,21 +176,15 @@ fn part_1(s: &str) -> u64 {
 }
 
 fn part_2(s: &str) -> u64 {
-    let snail_strings = s.lines().map(|l| l.chars().collect_vec()).collect_vec();
-    snail_strings
+    let elements = s.lines().map(parse).collect_vec();
+    elements
         .iter()
         .combinations(2)
         .map(|combo| {
-            let mut slice = &combo[0][..];
-            let a = parse(&mut slice);
-            let mut slice = &combo[0][..];
-            let a_ = parse(&mut slice);
-            let mut slice = &combo[1][..];
-            let b = parse(&mut slice);
-            let mut slice = &combo[1][..];
-            let b_ = parse(&mut slice);
-            let mut result_1 = add(a, b);
-            let mut result_2 = add(b_, a_);
+            let a = combo[0];
+            let b = combo[1];
+            let mut result_1 = add(a.clone(), b.clone());
+            let mut result_2 = add(b.clone(), a.clone());
             reduce(&mut result_1);
             reduce(&mut result_2);
             cmp::max(magnitude(&result_1), magnitude(&result_2))
